@@ -29,7 +29,7 @@ module.exports = {
                 if (oldState.channel.members.size === 0) {
                     oldState.channel.delete().catch(() => {});
                 }
-            }, 5000);
+            }, 2000);
         }
     }
 };
