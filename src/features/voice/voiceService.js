@@ -1,7 +1,7 @@
+const { ChannelType } = require('discord.js');
+
 const tempChannels = new Set();
 
-
-// channel ids
 const CREATE_CHANNEL_IDS = [
     "1494306247929757806",
     "1494315816815169746",
@@ -15,7 +15,7 @@ const CREATE_CHANNEL_IDS = [
     "1494316051075174510"
 ];
 
-// 🧠 función small caps
+// small caps
 function toSmallCaps(text) {
     const map = {
         a: "ᴀ", b: "ʙ", c: "ᴄ", d: "ᴅ", e: "ᴇ",
@@ -25,19 +25,13 @@ function toSmallCaps(text) {
         u: "ᴜ", v: "ᴠ", w: "ᴡ", x: "x", y: "ʏ", z: "ᴢ"
     };
 
-    return text
-        .toLowerCase()
-        .split("")
-        .map(c => map[c] || c)
-        .join("");
+    return text.toLowerCase().split("").map(c => map[c] || c).join("");
 }
 
 module.exports = {
-    name: "voiceStateUpdate",
+    async handleVoice(oldState, newState) {
 
-    execute(oldState, newState) {
-
-        // 👉 CREAR CANAL (MULTI PADRE)
+        // CREAR CANAL
         if (
             CREATE_CHANNEL_IDS.includes(newState.channelId) &&
             !CREATE_CHANNEL_IDS.includes(oldState.channelId)
@@ -46,28 +40,26 @@ module.exports = {
 
             const usernameStyled = toSmallCaps(newState.member.displayName);
 
-            guild.channels.create({
+            const channel = await guild.channels.create({
                 name: `🔊│ꜱᴀʟᴀ ᴅᴇ ${usernameStyled}`,
-                type: require('discord.js').ChannelType.GuildVoice,
+                type: ChannelType.GuildVoice,
                 parent: newState.channel.parent
-            }).then(channel => {
-
-                tempChannels.add(channel.id);
-
-                newState.member.voice.setChannel(channel);
             });
+
+            tempChannels.add(channel.id);
+
+            await newState.member.voice.setChannel(channel);
         }
 
-        // 👉 BORRAR SOLO TEMPORALES
+        // BORRAR CANAL
         if (
             oldState.channel &&
             tempChannels.has(oldState.channel.id) &&
             oldState.channel.members.size === 0
         ) {
-
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (oldState.channel.members.size === 0) {
-                    oldState.channel.delete().catch(() => {});
+                    await oldState.channel.delete().catch(() => {});
                     tempChannels.delete(oldState.channel.id);
                 }
             }, 2000);
