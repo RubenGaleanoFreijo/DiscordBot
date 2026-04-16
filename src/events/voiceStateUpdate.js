@@ -3,7 +3,7 @@ module.exports = {
 
     execute(oldState, newState) {
 
-        const CREATE_CHANNEL_ID = "1494303452422213653";
+        const CREATE_CHANNEL_ID = "1494304993497583656";
 
         console.log("VOICE EVENT TRIGGERED");
 
