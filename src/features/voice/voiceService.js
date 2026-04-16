@@ -1,6 +1,7 @@
 const { ChannelType } = require('discord.js');
 
-const tempChannels = new Set();
+const tempChannels = new Map();
+const creatingUsers = new Set();
 
 const CREATE_CHANNEL_IDS = [
     "1494306247929757806",
@@ -31,37 +32,71 @@ function toSmallCaps(text) {
 module.exports = {
     async handleVoice(oldState, newState) {
 
-        // CREAR CANAL
-        if (
-            CREATE_CHANNEL_IDS.includes(newState.channelId) &&
-            !CREATE_CHANNEL_IDS.includes(oldState.channelId)
-        ) {
-            const guild = newState.guild;
+        const guild = newState.guild || oldState.guild;
 
-            const usernameStyled = toSmallCaps(newState.member.displayName);
+        // 🧠 ANTI LOOP GLOBAL
+        if (oldState.channelId === newState.channelId) return;
 
-            const channel = await guild.channels.create({
-                name: `🔊│ꜱᴀʟᴀ ᴅᴇ ${usernameStyled}`,
-                type: ChannelType.GuildVoice,
-                parent: newState.channel.parent
-            });
+        // =========================
+        // 🟢 CREAR CANAL
+        // =========================
+        const joinedCreateChannel =
+            newState.channelId &&
+            CREATE_CHANNEL_IDS.includes(newState.channelId);
 
-            tempChannels.add(channel.id);
+        if (joinedCreateChannel) {
 
-            await newState.member.voice.setChannel(channel);
+            // 🧠 ANTI DUPLICADO POR USUARIO
+            if (creatingUsers.has(newState.member.id)) return;
+            creatingUsers.add(newState.member.id);
+
+            try {
+                const usernameStyled = toSmallCaps(newState.member.displayName);
+
+                const channel = await guild.channels.create({
+                    name: `🔊│ꜱᴀʟᴀ ᴅᴇ ${usernameStyled}`,
+                    type: ChannelType.GuildVoice,
+                    parent: newState.channel?.parent ?? null
+                });
+
+                tempChannels.set(channel.id, Date.now());
+
+                await newState.member.voice.setChannel(channel);
+
+            } finally {
+                creatingUsers.delete(newState.member.id);
+            }
         }
 
-        // BORRAR CANAL
+        // =========================
+        // 🔴 BORRAR CANAL
+        // =========================
+        const oldChannel = oldState.channel;
+
         if (
-            oldState.channel &&
-            tempChannels.has(oldState.channel.id) &&
-            oldState.channel.members.size === 0
+            oldChannel &&
+            tempChannels.has(oldChannel.id) &&
+            oldChannel.members.size === 0
         ) {
+
+            const channelId = oldChannel.id;
+
             setTimeout(async () => {
-                if (oldState.channel.members.size === 0) {
-                    await oldState.channel.delete().catch(() => {});
-                    tempChannels.delete(oldState.channel.id);
+
+                if (!tempChannels.has(channelId)) return;
+
+                const channel = await guild.channels.fetch(channelId).catch(() => null);
+
+                if (!channel) {
+                    tempChannels.delete(channelId);
+                    return;
                 }
+
+                if (channel.members.size > 0) return;
+
+                await channel.delete().catch(() => {});
+                tempChannels.delete(channelId);
+
             }, 2000);
         }
     }
