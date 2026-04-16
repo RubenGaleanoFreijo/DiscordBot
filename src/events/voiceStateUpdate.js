@@ -1,14 +1,17 @@
+const tempChannels = new Set();
+
+const CREATE_CHANNEL_ID = "1494306247929757806";
+
 module.exports = {
     name: "voiceStateUpdate",
 
     execute(oldState, newState) {
 
-        const tempChannels = new Set();
-        const CREATE_CHANNEL_ID = "1494306247929757806";
-
-        // 👉 SOLO cuando entra desde fuera
-        if (newState.channelId === CREATE_CHANNEL_ID && oldState.channelId !== CREATE_CHANNEL_ID) {
-
+        // 👉 crear canal
+        if (
+            newState.channelId === CREATE_CHANNEL_ID &&
+            oldState.channelId !== CREATE_CHANNEL_ID
+        ) {
             const guild = newState.guild;
 
             guild.channels.create({
@@ -23,7 +26,7 @@ module.exports = {
             });
         }
 
-        // 👉 borrar canal si queda vacío (con delay seguro)
+        // 👉 borrar canal SOLO si es temporal
         if (oldState.channel && tempChannels.has(oldState.channel.id) && oldState.channel.members.size === 0) {
 
             setTimeout(() => {
