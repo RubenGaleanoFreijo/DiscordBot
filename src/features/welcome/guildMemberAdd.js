@@ -1,5 +1,9 @@
 const welcomeService = require('./welcomeService');
 
-module.exports = (member) => {
-    welcomeService.sendWelcome(member);
+module.exports = async (member) => {
+    try {
+        await welcomeService.sendWelcome(member);
+    } catch (err) {
+        console.error(err);
+    }
 };

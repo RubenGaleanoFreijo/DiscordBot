@@ -1,10 +1,12 @@
 module.exports = {
-    sendWelcome(member) {
+    async sendWelcome(member) {
 
-        const channel = member.guild.systemChannel;
+        const channel = await member.guild.channels
+            .fetch("1494264090426605588")
+            .catch(() => null);
 
         if (!channel) return;
 
-        channel.send(`👋 Bienvenido ${member.user.username} al servidor! 🎉`);
+        channel.send(`👋 Bienvenido ${member} al servidor! 🎉`);
     }
 };
