@@ -1,5 +1,7 @@
 const tempChannels = new Set();
 
+
+// ids
 const CREATE_CHANNEL_IDS = [
     "1494306247929757806",
     "1494315816815169746",
