@@ -3,7 +3,7 @@ module.exports = {
 
     execute(oldState, newState) {
 
-        const CREATE_CHANNEL_ID = "1494304993497583656";
+        const CREATE_CHANNEL_ID = "1494306247929757806";
 
         console.log("VOICE EVENT TRIGGERED");
 
@@ -23,7 +23,7 @@ module.exports = {
         }
 
         // 👉 borrar canal si queda vacío (con delay seguro)
-        if (oldState.channel && oldState.channel.members.size === 0) {
+        if (oldState.channel && oldState.channel.id !== CREATE_CHANNEL_ID && oldState.channel.members.size === 0) {
 
             setTimeout(() => {
                 if (oldState.channel.members.size === 0) {
