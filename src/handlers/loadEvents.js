@@ -1,18 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const logger = require('../utils/logger');
-
 module.exports = (client) => {
-    const eventsPath = path.join(__dirname, '../events');
-    const eventFiles = fs.readdirSync(eventsPath);
+    const fs = require('fs');
+
+    const eventFiles = fs.readdirSync('./src/events').filter(file => file.endsWith('.js'));
 
     for (const file of eventFiles) {
         const event = require(`../events/${file}`);
 
-        const eventName = file.split('.')[0];
-
-        client.on(eventName, (...args) => event(...args, client));
-
-        logger.info(`Evento cargado: ${eventName}`);
+        if (event.once) {
+            client.once(event.name, (...args) => event.execute(...args, client));
+        } else {
+            client.on(event.name, (...args) => event.execute(...args, client));
+        }
     }
 };

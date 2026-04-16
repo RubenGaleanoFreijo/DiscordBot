@@ -1,31 +1,35 @@
-const { ChannelType } = require('discord.js');
-const { createChannelId } = require('../config/config');
-const tempChannels = require('../utils/tempChannels');
+module.exports = {
+    name: "voiceStateUpdate",
 
-module.exports = async (oldState, newState) => {
+    execute(oldState, newState) {
 
-    if (newState.channelId === createChannelId) {
+        const CREATE_CHANNEL_ID = "1494280855160492142";
 
-        const guild = newState.guild;
+        console.log("VOICE EVENT TRIGGERED");
 
-        const channel = await guild.channels.create({
-            name: `Sala de ${newState.member.user.username}`,
-            type: ChannelType.GuildVoice,
-            parent: newState.channel.parent
-        });
+        // 👉 SOLO cuando entra desde fuera
+        if (!oldState.channelId && newState.channelId === CREATE_CHANNEL_ID) {
 
-        tempChannels.set(channel.id, true);
+            const guild = newState.guild;
 
-        await newState.member.voice.setChannel(channel);
-    }
+            guild.channels.create({
+                name: `Sala de ${newState.member.user.username}`,
+                type: require('discord.js').ChannelType.GuildVoice,
+                parent: newState.channel.parent
+            }).then(channel => {
 
-    if (oldState.channelId && tempChannels.has(oldState.channelId)) {
+                newState.member.voice.setChannel(channel);
+            });
+        }
 
-        const channel = oldState.channel;
+        // 👉 borrar canal si queda vacío (con delay seguro)
+        if (oldState.channel && oldState.channel.members.size === 0) {
 
-        if (channel.members.size === 0) {
-            await channel.delete();
-            tempChannels.delete(oldState.channelId);
+            setTimeout(() => {
+                if (oldState.channel.members.size === 0) {
+                    oldState.channel.delete().catch(() => {});
+                }
+            }, 5000);
         }
     }
 };
