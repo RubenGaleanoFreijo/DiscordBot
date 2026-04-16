@@ -8,7 +8,7 @@ module.exports = {
         console.log("VOICE EVENT TRIGGERED");
 
         // 👉 SOLO cuando entra desde fuera
-        if (!oldState.channelId && newState.channelId === CREATE_CHANNEL_ID) {
+        if (newState.channelId === CREATE_CHANNEL_ID && oldState.channelId !== CREATE_CHANNEL_ID) {
 
             const guild = newState.guild;
 
