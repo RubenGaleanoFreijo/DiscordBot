@@ -1,6 +1,17 @@
 const tempChannels = new Set();
 
-const CREATE_CHANNEL_ID = "1494306247929757806";
+const CREATE_CHANNEL_IDS = [
+    "1494306247929757806",
+    "1494315816815169746",
+    "1494315917310693436",
+    "1494315902727098448",
+    "1494315883386900680",
+    "1494315894497742968",
+    "1494315866605621327",
+    "1494315847143919656",
+    "1494315856568516811",
+    "1494316051075174510"
+];
 
 // 🧠 función small caps
 function toSmallCaps(text) {
@@ -24,10 +35,10 @@ module.exports = {
 
     execute(oldState, newState) {
 
-        // 👉 crear canal
+        // 👉 CREAR CANAL (MULTI PADRE)
         if (
-            newState.channelId === CREATE_CHANNEL_ID &&
-            oldState.channelId !== CREATE_CHANNEL_ID
+            CREATE_CHANNEL_IDS.includes(newState.channelId) &&
+            !CREATE_CHANNEL_IDS.includes(oldState.channelId)
         ) {
             const guild = newState.guild;
 
@@ -45,8 +56,12 @@ module.exports = {
             });
         }
 
-        // 👉 borrar canal SOLO si es temporal
-        if (oldState.channel && tempChannels.has(oldState.channel.id) && oldState.channel.members.size === 0) {
+        // 👉 BORRAR SOLO TEMPORALES
+        if (
+            oldState.channel &&
+            tempChannels.has(oldState.channel.id) &&
+            oldState.channel.members.size === 0
+        ) {
 
             setTimeout(() => {
                 if (oldState.channel.members.size === 0) {
