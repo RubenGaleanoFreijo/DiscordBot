@@ -5,8 +5,6 @@ module.exports = {
 
         const CREATE_CHANNEL_ID = "1494306247929757806";
 
-        console.log("VOICE EVENT TRIGGERED");
-
         // 👉 SOLO cuando entra desde fuera
         if (newState.channelId === CREATE_CHANNEL_ID && oldState.channelId !== CREATE_CHANNEL_ID) {
 
