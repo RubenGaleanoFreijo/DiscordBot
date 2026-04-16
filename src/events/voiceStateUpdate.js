@@ -3,6 +3,7 @@ module.exports = {
 
     execute(oldState, newState) {
 
+        const tempChannels = new Set();
         const CREATE_CHANNEL_ID = "1494306247929757806";
 
         // 👉 SOLO cuando entra desde fuera
@@ -16,16 +17,19 @@ module.exports = {
                 parent: newState.channel.parent
             }).then(channel => {
 
+                tempChannels.add(channel.id);
+
                 newState.member.voice.setChannel(channel);
             });
         }
 
         // 👉 borrar canal si queda vacío (con delay seguro)
-        if (oldState.channel && oldState.channel.id !== CREATE_CHANNEL_ID && oldState.channel.members.size === 0) {
+        if (oldState.channel && tempChannels.has(oldState.channel.id) && oldState.channel.members.size === 0) {
 
             setTimeout(() => {
                 if (oldState.channel.members.size === 0) {
                     oldState.channel.delete().catch(() => {});
+                    tempChannels.delete(oldState.channel.id);
                 }
             }, 2000);
         }
