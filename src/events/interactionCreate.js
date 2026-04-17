@@ -1,1 +1,0 @@
-//para usar comandos en un futuro

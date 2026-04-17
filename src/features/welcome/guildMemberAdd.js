@@ -1,9 +1,9 @@
+console.log("EVENTO guildMemberAdd DISPARADO");
+
 const welcomeService = require('./welcomeService');
 
 module.exports = async (member) => {
-    try {
-        await welcomeService.sendWelcome(member);
-    } catch (err) {
-        console.error(err);
-    }
+    console.log("👋 guildMemberAdd ejecutado");
+
+    await welcomeService.sendWelcome(member);
 };

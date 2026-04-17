@@ -3,7 +3,6 @@ const path = require('path');
 
 module.exports = (client) => {
 
-    // 🔹 CARGAR EVENTS (core)
     const eventsPath = path.join(__dirname, '../events');
     const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
@@ -17,7 +16,7 @@ module.exports = (client) => {
         }
     }
 
-    // 🔥 CARGAR FEATURES AUTOMÁTICAMENTE
+    // FEATURES
     const featuresPath = path.join(__dirname, '../features');
     const featureFolders = fs.readdirSync(featuresPath);
 
@@ -28,19 +27,14 @@ module.exports = (client) => {
 
         for (const file of files) {
 
-            // solo eventos (nombre típico)
-            if (
-                file.includes('voiceStateUpdate') ||
-                file.includes('guildMemberAdd')
-            ) {
-                const event = require(`../features/${folder}/${file}`);
+            const eventName = file.split('.')[0];
 
-                const eventName = file.split('.')[0];
+            const event = require(`../features/${folder}/${file}`);
 
-                client.on(eventName, event);
+            console.log(`⚡ Feature cargada: ${eventName}`);
 
-                console.log(`⚡ Feature cargada: ${eventName}`);
-            }
+            // 🔥 IMPORTANTE: orden correcto Discord.js
+            client.on(eventName, (...args) => event(...args, client));
         }
     }
 };

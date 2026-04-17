@@ -37,6 +37,7 @@ module.exports = {
         // 🧠 ANTI LOOP GLOBAL
         if (oldState.channelId === newState.channelId) return;
 
+        console.log("AUDIO FUNCIONANDO");
         // =========================
         // 🟢 CREAR CANAL
         // =========================
@@ -98,6 +99,8 @@ module.exports = {
                 tempChannels.delete(channelId);
 
             }, 2000);
+
+            console.log("CERRANDO CANAL")
         }
     }
 };

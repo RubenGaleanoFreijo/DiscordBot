@@ -1,12 +1,36 @@
-module.exports = {
-    async sendWelcome(member) {
+const guildConfig = require('../../database/guildConfigService');
 
-        const channel = await member.guild.channels
-            .fetch("1494264090426605588")
-            .catch(() => null);
+async function sendWelcome(member) {
 
-        if (!channel) return;
+    console.log("📨 welcomeService ejecutado");
 
-        channel.send(`👋 Bienvenido ${member} al servidor! 🎉`);
+    const channelId = await guildConfig.getWelcomeChannel(member.guild.id);
+    console.log("📌 channelId:", channelId);
+
+    if (!channelId) return;
+
+    let channel;
+
+    try {
+        channel = await member.guild.channels.fetch(channelId);
+    } catch (err) {
+        console.log("❌ error fetch channel:", err.message);
+        return;
     }
+
+    if (!channel) {
+        console.log("❌ canal no existe");
+        return;
+    }
+
+    try {
+        await channel.send(`👋 Bienvenido ${member} al servidor! 🎉`);
+        console.log("✅ mensaje enviado");
+    } catch (err) {
+        console.log("❌ error send:", err.message);
+    }
+}
+
+module.exports = {
+    sendWelcome
 };

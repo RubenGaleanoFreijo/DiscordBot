@@ -1,20 +1,21 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 
-// 👉 Solo carga dotenv en local
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
+// 🔥 ENV SIEMPRE PRIMERO
+require('dotenv').config();
 
 const config = require('./src/config/config');
 const loadEvents = require('./src/handlers/loadEvents');
 const loadCommands = require('./src/handlers/loadCommands');
+const initDatabase = require('./src/database/init');
 
 // Cliente Discord
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
     ]
 });
 
@@ -25,5 +26,19 @@ client.commands = new Collection();
 loadCommands(client);
 loadEvents(client);
 
-// Login del bot
-client.login(config.token);
+// 🚀 START SECUENCIAL (DB → BOT)
+(async () => {
+    try {
+        console.log("🟡 Inicializando base de datos...");
+        await initDatabase();
+        console.log("🟢 Base de datos lista");
+
+        console.log("🤖 Iniciando bot...");
+        await client.login(config.token);
+
+        console.log("🟢 Bot conectado correctamente");
+
+    } catch (err) {
+        console.error("❌ Error iniciando bot:", err);
+    }
+})();
