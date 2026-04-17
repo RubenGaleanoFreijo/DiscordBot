@@ -5,7 +5,10 @@ async function sendWelcome(member) {
     console.log("📨 welcomeService ejecutado");
 
     const channelId = await guildConfig.getWelcomeChannel(member.guild.id);
+    const message = await guildConfig.getWelcomeMessage(member.guild.id);
+
     console.log("📌 channelId:", channelId);
+    console.log("💬 message:", message);
 
     if (!channelId) return;
 
@@ -24,8 +27,21 @@ async function sendWelcome(member) {
     }
 
     try {
-        await channel.send(`👋 Bienvenido ${member} al servidor! 🎉`);
+
+        const guild = member.guild;
+
+        const finalMessage =
+            message
+                ? message
+                    .replace('{user}', `<@${member.id}>`)
+                    .replace('{server}', guild.name)
+                    .replace('{members}', guild.memberCount)
+                : `👋 Bienvenido ${member} al servidor! 🎉`;
+
+        await channel.send(finalMessage);
+
         console.log("✅ mensaje enviado");
+
     } catch (err) {
         console.log("❌ error send:", err.message);
     }

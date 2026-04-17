@@ -6,6 +6,7 @@ async function initDatabase() {
             CREATE TABLE IF NOT EXISTS guild_config (
                 guild_id TEXT PRIMARY KEY,
                 welcome_channel TEXT,
+                welcome_message TEXT,
                 create_channels TEXT
             );
         `);
