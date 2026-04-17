@@ -4,20 +4,29 @@ const path = require('path');
 module.exports = (client) => {
 
     const commandsPath = path.join(__dirname, '../commands');
-    const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'));
 
-    for (const file of commandFiles) {
+    const load = (dir) => {
+        const files = fs.readdirSync(dir);
 
-        const command = require(`../commands/${file}`);
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
 
-        // 🧠 VALIDACIÓN CRÍTICA
-        if (!command.name || typeof command.execute !== 'function') {
-            console.log(`❌ Comando inválido: ${file}`);
-            continue;
+            if (fs.lstatSync(fullPath).isDirectory()) {
+                load(fullPath);
+            } else if (file.endsWith('.js')) {
+                const command = require(fullPath);
+
+                // 🔹 Slash command
+                if (command.data) {
+                    client.commands.set(command.data.name, command);
+                }
+                // 🔹 Prefijo command
+                else if (command.name) {
+                    client.commands.set(command.name, command);
+                }
+            }
         }
+    };
 
-        client.commands.set(command.name, command);
-
-        console.log("⚡ Command cargado:", command.name);
-    }
+    load(commandsPath);
 };
